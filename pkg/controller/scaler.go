@@ -73,11 +73,13 @@ func scaleRedisHandler(writer http.ResponseWriter, request *http.Request) {
 		panic(err2)
 	}
 	resp := new(ScaleRedisResponse)
-	//
-	addr := redis.GetOperator().Scale(scaleReq.Key)
-
+	if len(global.RedisConfig) < scaleReq.InstanceNum {
+		for i := 0; i < scaleReq.InstanceNum-len(global.RedisConfig); i++ {
+			redis.GetOperator().Scale(scaleReq.Key)
+		}
+	}
 	resp.Key = scaleReq.Key
-	resp.Addr = addr
+	resp.Addr = "addr"
 	marshal, err := json.Marshal(resp)
 	if err != nil {
 		panic(err)
