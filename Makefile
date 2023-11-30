@@ -22,5 +22,5 @@ endif
 export GOARCH ?= $(TARGET_ARCH_LOCAL)
 
 build:
-	go build -o scaler cmd/main.go
+	go build -o scaler main.go
 
