@@ -77,7 +77,7 @@ func (op *Operator) createStatefulSet(name, secretName, cmName string) error {
 								},
 								InitialDelaySeconds: 30,
 								PeriodSeconds:       10,
-								TimeoutSeconds:      5,
+								TimeoutSeconds:      10,
 							},
 							LivenessProbe: &corev1.Probe{
 								ProbeHandler: corev1.ProbeHandler{
@@ -87,9 +87,12 @@ func (op *Operator) createStatefulSet(name, secretName, cmName string) error {
 								},
 								InitialDelaySeconds: 30,
 								PeriodSeconds:       10,
-								TimeoutSeconds:      5,
+								TimeoutSeconds:      10,
 							},
 						},
+					},
+					NodeSelector: map[string]string{
+						"kubernetes.io/hostname": "changjiang24",
 					},
 					Volumes: []corev1.Volume{
 						{

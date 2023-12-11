@@ -5,9 +5,11 @@ import (
 	"conserver/pkg/global"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"time"
 )
 
 type RedisClient struct {
@@ -25,9 +27,8 @@ func GetRedisClient() *RedisClient {
 
 func newRedisClient() *RedisClient {
 	c := redis.NewClient(&redis.Options{
-		Addr:     "10.10.150.20:30003",
-		Password: "123456",
-		DB:       2,
+		Addr: "10.10.150.24:32112",
+		DB:   2,
 	})
 	return &RedisClient{client: c}
 }
@@ -65,7 +66,7 @@ func (r *RedisClient) SetRedis() {
 	if err != nil {
 		panic(err)
 	}
-
+	fmt.Printf("更新redis配置信息，新配置：%v, 当前时间：%v\n", r2.Config, time.Now())
 	err = r.client.Set(context.TODO(), config.RedisConfigKey, string(bytes), -1).Err()
 	if err != nil {
 		panic(err)

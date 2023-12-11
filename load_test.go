@@ -1,6 +1,7 @@
 package main
 
 import (
+	"conserver/pkg/redis"
 	"context"
 	"fmt"
 	"k8s.io/apimachinery/pkg/util/rand"
@@ -72,4 +73,13 @@ func BenchmarkMatch(b *testing.B) {
 		return insertTimes[i] < insertTimes[j]
 	})
 	fmt.Printf("插入总数：%d, 运行时间：%d, p50: %d, p90: %d, p99: %d, avg: %d\n", counter, total, insertTimes[len(insertTimes)/2], insertTimes[int(float64(len(insertTimes))*0.9)], insertTimes[int(float64(len(insertTimes))*0.99)], int(float64(total)/float64(counter)))
+}
+
+func TestMySQL(t *testing.T) {
+	ch := make(chan int)
+	redis.GetInstancePool().Init(&redis.InstancePoolConfig{
+		PoolSize:     5,
+		InitInstance: nil,
+	})
+	<-ch
 }

@@ -1,7 +1,7 @@
 .PHONY: build
 
 export GO111MODULE ?= on
-export GOPROXY ?= https://proxy.golang.org
+export GOPROXY ?= https://goproxy.cn
 export GOSUMDB ?= sum.golang.org
 
 
@@ -24,3 +24,9 @@ export GOARCH ?= $(TARGET_ARCH_LOCAL)
 build:
 	go build -o scaler main.go
 
+docker-build:
+	docker build -t 10.10.150.23:35000/ax-scaler:v0.0.1 .
+
+
+docker-push:
+	docker buipushld 10.10.150.23:35000/ax-scaler:v0.0.1

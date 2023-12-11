@@ -6,14 +6,16 @@ type ConsistentCache struct {
 	cache sync.Map
 }
 
-func (c *ConsistentCache) Get(key string) string {
-	if value, ok := c.cache.Load(key); ok {
+var tableMap ConsistentCache = ConsistentCache{cache: sync.Map{}}
+
+func GetTableName(key string) string {
+	if value, ok := tableMap.cache.Load(key); ok {
 		return value.(string)
 	}
 	return ""
 
 }
 
-func (c *ConsistentCache) Set(key, value string) {
-	c.cache.Store(key, value)
+func SetTableName(key, value string) {
+	tableMap.cache.Store(key, value)
 }

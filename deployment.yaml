@@ -1,0 +1,49 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: ax-scaler
+  namespace: dapr-yxb
+  labels:
+    app: ax-scaler
+spec:
+  selector:
+    app: ax-scaler
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 18080
+      nodePort: 31444
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ax-scaler
+  namespace: dapr-yxb
+  labels:
+    app: ax-scaler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ax-scaler
+  template:
+    metadata:
+      labels:
+        app: ax-scaler
+    spec:
+      resources:
+        limits:
+          cpu: 2000m
+          memory: 4Gi
+        requests:
+          cpu: 2000m
+          memory: 4Gi
+      containers:
+        - name: ax-scaler
+          image: 10.10.150.23:35000/ax-scaler:v0.0.1
+          ports:
+            - containerPort: 18080
+          imagePullPolicy: Always
+

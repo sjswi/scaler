@@ -8,9 +8,10 @@ type ScaleResponse struct {
 	Weights            []int    `json:"weights"`
 }
 type NameToClusterResponse struct {
-	Status      string `json:"status"`
-	Message     string `json:"message"`
-	ClusterName string `json:"clusterName"`
+	Status      string   `json:"status"`
+	ClusterName string   `json:"clusterName"`
+	SourceDSP   string   `json:"sourceDSP"`
+	ReplicaDSPs []string `json:"replicaDSPs"`
 }
 
 type ScaleRedisResponse struct {

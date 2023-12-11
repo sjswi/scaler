@@ -5,6 +5,7 @@ import (
 	"conserver/pkg/k8s"
 	"conserver/pkg/mysql"
 	"conserver/pkg/redis"
+	"conserver/pkg/util"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -25,34 +26,46 @@ func scaleMySQLHandler(writer http.ResponseWriter, request *http.Request) {
 		panic(err2)
 	}
 	resp := new(ScaleResponse)
-	//
-
 	resp.Key = scaleReq.Key
-	if _, ok := global.DbConfig.ClusterConnConfig[scaleReq.Key]; ok {
-		// 伸缩从数据库
+	//
+	if s := util.GetTableName(scaleReq.TableName); s == "" {
+		if scaleReq.Key == "" {
+			// 创建主数据库
+			key := mysql.GetOperator().NewMaster()
+			resp.Key = key
+			resp.ReplicaDSPs = global.DbConfig.ClusterConnConfig[key].Replica
+			resp.SourceDSP = global.DbConfig.ClusterConnConfig[key].Source
 
-		if scaleReq.ScaleType == "up" {
-			dsps := make([]string, 0)
-			for i := 0; i < scaleReq.InstanceNum-len(global.DbConfig.ClusterConnConfig[scaleReq.Key].ElasticReplica); i++ {
-				fmt.Printf("%s扩容%d个实例", scaleReq.Key, scaleReq.InstanceNum)
-				dsp := mysql.GetOperator().ScaleUp(scaleReq.Key)
-				dsps = append(dsps, dsp)
+			util.SetTableName(scaleReq.TableName, key)
+		} else {
+			if _, ok := global.DbConfig.ClusterConnConfig[scaleReq.Key]; ok {
+				// 伸缩从数据库
+
+				if scaleReq.ScaleType == "up" {
+					dsps := make([]string, 0)
+					for i := 0; i < scaleReq.InstanceNum-len(global.DbConfig.ClusterConnConfig[scaleReq.Key].ElasticReplica); i++ {
+						fmt.Printf("%s扩容%d个实例", scaleReq.Key, scaleReq.InstanceNum)
+						dsp := mysql.GetOperator().ScaleUp(scaleReq.Key)
+						dsps = append(dsps, dsp)
+					}
+					resp.ElasticReplicaDSPs = dsps
+
+				} else if scaleReq.ScaleType == "down" {
+					for i := 0; i < len(global.DbConfig.ClusterConnConfig[scaleReq.Key].ElasticReplica)-scaleReq.InstanceNum; i++ {
+						fmt.Printf("%s缩容到%d个实例", scaleReq.Key, scaleReq.InstanceNum)
+						mysql.GetOperator().ScaleDown(scaleReq.Key)
+					}
+
+				}
+			} else {
+				panic("key not exists")
 			}
-			resp.ElasticReplicaDSPs = dsps
-
-		} else if scaleReq.ScaleType == "down" {
-			for i := 0; i < len(global.DbConfig.ClusterConnConfig[scaleReq.Key].ElasticReplica)-scaleReq.InstanceNum; i++ {
-				fmt.Printf("%s缩容到%d个实例", scaleReq.Key, scaleReq.InstanceNum)
-				mysql.GetOperator().ScaleDown(scaleReq.Key)
-			}
-
 		}
 	} else {
-		// 创建主数据库
-		sdsp, rdsps := mysql.GetOperator().NewMaster(scaleReq.Key)
-		resp.ReplicaDSPs = rdsps
-		resp.SourceDSP = sdsp
+		resp.ReplicaDSPs = global.DbConfig.ClusterConnConfig[s].Replica
+		resp.SourceDSP = global.DbConfig.ClusterConnConfig[s].Source
 	}
+
 	marshal, err := json.Marshal(resp)
 	if err != nil {
 		panic(err)

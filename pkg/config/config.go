@@ -9,6 +9,7 @@ type ClusterConfig struct {
 	ReplicaWeight   []int    `json:"replicaWeight"`
 	ElasticInstance map[string]*Instance
 	ServerIds       []int
+	Name            string
 }
 type RedisConfig struct {
 	Host     string `json:"host"`
@@ -17,7 +18,7 @@ type RedisConfig struct {
 }
 
 const (
-	NodeIP              string = "10.10.150.28"
+	NodeIP              string = "10.10.150.24"
 	PersistentInstance  int64  = 3
 	CostPerMinute       int64  = 10
 	DatabaseKey         string = "dapr-tmysql-1"
@@ -31,7 +32,17 @@ type Instance struct {
 	CreateTime    time.Time
 	CostPerMinute int64
 	NodePort      int
+	DSP           string
 }
+
+type RedisInstance struct {
+	Name          string
+	CreateTime    time.Time
+	CostPerMinute int64
+	NodePort      int
+	Addr          string
+}
+
 type ScaleRule struct {
 	Type string `json:"type"` // 支持执行时间、负载并发数。后续可支持：CPU、Memory等等
 	Min  int64  `json:"min"`  // 最小值，最大值

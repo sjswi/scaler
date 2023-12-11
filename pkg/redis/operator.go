@@ -3,8 +3,8 @@ package redis
 import (
 	"conserver/pkg/global"
 	"conserver/pkg/k8s"
-	"conserver/pkg/util"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -22,26 +22,15 @@ func GetOperator() *Operator {
 }
 func (op *Operator) Scale(key string) string {
 	client := k8s.GetRedisClient()
-	uid := util.RandomName()
-	deployName := fmt.Sprintf("redis-deploy-%s", uid)
-	svcName := fmt.Sprintf("redis-svc-%s", uid)
-
-	err := op.createRedisStatefulSet(deployName)
-	if err != nil {
-		panic(err)
-	}
-	nodeport, err := op.createService(deployName, svcName)
-	if err != nil {
-		panic(err)
-	}
-	addr := fmt.Sprintf("%s:%d", "10.10.150.28", nodeport)
+	pool := GetInstancePool()
+	instance := pool.GetInstance()
 	global.RedisConfig[key] = map[string]string{
-		"redisHost":     addr,
+		"redisHost":     instance.Addr,
 		"redisPassword": "",
 	}
-	op.waitReady(deployName)
 	client.SetRedis()
-	return addr
+	log.Default().Printf("增加一个redis实例，key：%s, addr：%s", key, instance.Addr)
+	return instance.Addr
 }
 
 func (op *Operator) waitReady(name string) {
@@ -54,7 +43,7 @@ func (op *Operator) waitReady(name string) {
 		}
 		// 检查 StatefulSet 的状态
 		if ss.Status.ReadyReplicas == *ss.Spec.Replicas {
-			fmt.Println("StatefulSet is ready")
+			fmt.Println("Redis StatefulSet is ready")
 			break
 		}
 

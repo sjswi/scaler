@@ -17,48 +17,13 @@ var operator *Operator
 
 func (op *Operator) ScaleUp(key string) string {
 	// 创建一个从数据库，通过mysqldump加载主数据库数据，然后通过exec在pod中运行configmap加载的脚本将实例作为主数据库的slave
+	pools := GetInstancePool()
+	instance := pools.GetInstance()
+	deployName := fmt.Sprintf("mysql-deploy-%s", instance.Name)
+	op.setup(deployName, global.DbConfig.ClusterConnConfig[key].Source, "slave")
 
-	// uuid 生成一个唯一的标识符 uid，确保资源名称的唯一性。
-	uid := util.RandomName()
-
-	deployName := fmt.Sprintf("mysql-deploy-%s", uid)
-
-	cmName := fmt.Sprintf("mysql-cm-%s", uid)
-	secretName := fmt.Sprintf("mysql-secret-%s", uid[:6])
-	svcName := fmt.Sprintf("mysql-svc-%s", uid[:6])
-	dbName := "db_test"
-	//s := strings.Split(masterEndpoint, ":")
-
-	err := op.createSecret(secretName, dbName)
-	if err != nil {
-		panic(err)
-	}
-	err = op.createDBConfigMap(cmName, util.NewServerID(global.DbConfig.ClusterConnConfig[key].ServerIds, len(global.DbConfig.ClusterConnConfig[key].ServerIds)))
-	if err != nil {
-		panic(err)
-	}
-	err = op.createStatefulSet(deployName, secretName, cmName)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(uid[:6])
-	nodeport, err := op.createService(deployName, svcName)
-	if err != nil {
-		panic(err)
-	}
-	dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", "10.10.150.28", nodeport, dbName)
-	op.waitReady(deployName)
-	op.setup(deployName, key, "slave")
-	//global.DbConfig.ClusterConnConfig[key].Replica = append(global.DbConfig.ClusterConnConfig[key].Replica, dsp)
-	//global.DbConfig.ClusterConnConfig[key].ReplicaWeight = append(global.DbConfig.ClusterConnConfig[key].ReplicaWeight, 1)
-	global.DbConfig.ClusterConnConfig[key].ElasticInstance[deployName] = &config.Instance{
-		Name:          deployName,
-		CreateTime:    time.Now(),
-		CostPerMinute: 3,
-		NodePort:      int(nodeport),
-	}
-	global.DbConfig.ClusterConnConfig[key].ElasticReplica = append(global.DbConfig.ClusterConnConfig[key].ElasticReplica, dsp)
-	return dsp
+	global.DbConfig.ClusterConnConfig[key].ElasticReplica = append(global.DbConfig.ClusterConnConfig[key].ElasticReplica, instance.DSP)
+	return instance.DSP
 }
 func init() {
 	operator = &Operator{}
@@ -123,7 +88,7 @@ func (op *Operator) ScaleDown(key string) {
 		// Optionally handle the error
 	}
 
-	dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", "10.10.150.28", global.DbConfig.ClusterConnConfig[key].ElasticInstance[deployName].NodePort, "db_test")
+	dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", "10.10.150.24", global.DbConfig.ClusterConnConfig[key].ElasticInstance[deployName].NodePort, "db_test")
 	for i := 0; i < len(global.DbConfig.ClusterConnConfig[key].ElasticReplica); i++ {
 		if global.DbConfig.ClusterConnConfig[key].ElasticReplica[i] == dsp {
 			global.DbConfig.ClusterConnConfig[key].ElasticReplica = append(global.DbConfig.ClusterConnConfig[key].ElasticReplica[:i], global.DbConfig.ClusterConnConfig[key].ElasticReplica[i+1:]...)
@@ -135,46 +100,14 @@ func (op *Operator) ScaleDown(key string) {
 
 }
 
-func (op *Operator) NewMaster(key string) (string, []string) {
-	// uuid 生成一个唯一的标识符 uid，确保资源名称的唯一性。
-	uid := util.RandomName()
-	deployName := fmt.Sprintf("mysql-deploy-%s", uid)
-	cmName := fmt.Sprintf("mysql-cm-%s", uid)
-	secretName := fmt.Sprintf("mysql-secret-%s", uid)
-	svcName := fmt.Sprintf("mysql-svc-%s", uid)
-	dbName := "db_test"
+func (op *Operator) NewMaster() string {
+	pool := GetClusterPool()
+	cluster := pool.GetCluster()
+	if _, ok := global.DbConfig.ClusterConnConfig[cluster.Name]; !ok {
+		global.DbConfig.ClusterConnConfig[cluster.Name] = cluster
+	}
 
-	err := op.createSecret(secretName, dbName)
-	if err != nil {
-		panic(err)
-	}
-	err = op.createDBConfigMap(cmName, 1)
-	if err != nil {
-		panic(err)
-	}
-	err = op.createStatefulSet(deployName, secretName, cmName)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(uid[:6])
-	nodeport, err := op.createService(deployName, svcName)
-	if err != nil {
-		panic(err)
-	}
-	dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", "10.10.150.28", nodeport, dbName)
-	op.waitReady(deployName)
-	global.DbConfig.ClusterConnConfig[key] = &config.ClusterConfig{
-		Source:          dsp,
-		Replica:         []string{dsp},
-		ElasticInstance: map[string]*config.Instance{},
-		ElasticReplica:  make([]string, 0),
-		ServerIds:       []int{1},
-		ReplicaWeight:   []int{1},
-	}
-	//dsp1 := scaleUp(Clientset, key, fmt.Sprintf("%s:%d", "10.10.150.28", nodeport))
-	op.setup(deployName, key, "master")
-
-	return dsp, []string{dsp}
+	return cluster.Name
 }
 
 func (op *Operator) waitReady(name string) {
@@ -187,7 +120,7 @@ func (op *Operator) waitReady(name string) {
 		}
 		// 检查 StatefulSet 的状态
 		if ss.Status.ReadyReplicas == *ss.Spec.Replicas {
-			fmt.Println("StatefulSet is ready")
+			fmt.Println("MySQL StatefulSet is ready")
 			break
 		}
 
@@ -195,8 +128,8 @@ func (op *Operator) waitReady(name string) {
 	}
 }
 
-func (op *Operator) setup(name, key, s string) {
-	host, port := util.ParseDSP(global.DbConfig.ClusterConnConfig[key].Source)
+func (op *Operator) setup(name, sourceDSP, s string) {
+	host, port := util.ParseDSP(sourceDSP)
 	podName := util.GetPodName(name)
 	client := k8s.GetK8sClient()
 
