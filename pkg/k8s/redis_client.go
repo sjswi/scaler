@@ -18,7 +18,7 @@ type RedisClient struct {
 
 var redisClient *RedisClient
 
-func init() {
+func Init() {
 	redisClient = newRedisClient()
 }
 func GetRedisClient() *RedisClient {
@@ -27,7 +27,7 @@ func GetRedisClient() *RedisClient {
 
 func newRedisClient() *RedisClient {
 	c := redis.NewClient(&redis.Options{
-		Addr: "10.10.150.24:32112",
+		Addr: fmt.Sprintf("%s:%d", global.Host, global.ConfigPort),
 		DB:   2,
 	})
 	return &RedisClient{client: c}

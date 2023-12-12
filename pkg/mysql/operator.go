@@ -88,7 +88,7 @@ func (op *Operator) ScaleDown(key string) {
 		// Optionally handle the error
 	}
 
-	dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", "10.10.150.24", global.DbConfig.ClusterConnConfig[key].ElasticInstance[deployName].NodePort, "db_test")
+	dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", global.Host, global.DbConfig.ClusterConnConfig[key].ElasticInstance[deployName].NodePort, "db_test")
 	for i := 0; i < len(global.DbConfig.ClusterConnConfig[key].ElasticReplica); i++ {
 		if global.DbConfig.ClusterConnConfig[key].ElasticReplica[i] == dsp {
 			global.DbConfig.ClusterConnConfig[key].ElasticReplica = append(global.DbConfig.ClusterConnConfig[key].ElasticReplica[:i], global.DbConfig.ClusterConnConfig[key].ElasticReplica[i+1:]...)

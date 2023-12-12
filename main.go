@@ -29,9 +29,13 @@ func main() {
 	}
 
 	nodeports := viper.GetIntSlice("cluster.ports")
+	global.Host = viper.GetString("host")
+	global.ConfigPort = viper.GetInt("configPort")
+	fmt.Printf("%s:%d", global.Host, global.ConfigPort)
+	k8s.Init()
 	confs := make([]config.ClusterConfig, len(nodeports))
 	for i, v := range nodeports {
-		dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", "10.10.150.24", v, "db_test")
+		dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", global.Host, v, "db_test")
 		confs[i] = config.ClusterConfig{
 			Source:          dsp,
 			Replica:         []string{dsp},
@@ -58,7 +62,7 @@ func main() {
 	rNodeports := viper.GetIntSlice("redis.ports")
 	rConfs := make([]*config.RedisInstance, len(nodeports))
 	for i, v := range rNodeports {
-		addr := fmt.Sprintf("10.10.150.24:%d", v)
+		addr := fmt.Sprintf("%s:%d", global.Host, v)
 		rConfs[i] = &config.RedisInstance{
 			Name:          fmt.Sprintf("redis-%d", i),
 			CreateTime:    time.Now(),

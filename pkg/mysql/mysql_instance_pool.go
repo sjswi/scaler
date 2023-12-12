@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"conserver/pkg/config"
+	"conserver/pkg/global"
 	"conserver/pkg/k8s"
 	"conserver/pkg/util"
 	"fmt"
@@ -119,7 +120,7 @@ func (m *MySQLInstancePool) newInstance() *config.Instance {
 	if err != nil {
 		panic(err)
 	}
-	dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", "10.10.150.24", nodeport, dbName)
+	dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", global.Host, nodeport, dbName)
 	op.waitReady(deployName)
 
 	//global.DbConfig.ClusterConnConfig[key].Replica = append(global.DbConfig.ClusterConnConfig[key].Replica, dsp)

@@ -18,7 +18,6 @@ type RedisConfig struct {
 }
 
 const (
-	NodeIP              string = "10.10.150.24"
 	PersistentInstance  int64  = 3
 	CostPerMinute       int64  = 10
 	DatabaseKey         string = "dapr-tmysql-1"

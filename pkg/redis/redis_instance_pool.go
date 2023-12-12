@@ -2,6 +2,7 @@ package redis
 
 import (
 	"conserver/pkg/config"
+	"conserver/pkg/global"
 	"conserver/pkg/util"
 	"fmt"
 	"sync"
@@ -86,7 +87,7 @@ func (m *RedisInstancePool) newInstance() *config.RedisInstance {
 	if err != nil {
 		panic(err)
 	}
-	addr := fmt.Sprintf("%s:%d", "10.10.150.24", nodeport)
+	addr := fmt.Sprintf("%s:%d", global.Host, nodeport)
 	instance := &config.RedisInstance{
 		Name:          "",
 		CreateTime:    time.Now(),
