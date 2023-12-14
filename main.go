@@ -50,10 +50,10 @@ func main() {
 
 	global.RedisConfig = make(map[string]map[string]string)
 
-	mysql.GetInstancePool().Init(&mysql.InstancePoolConfig{
-		PoolSize:     0,
-		InitInstance: []string{},
-	})
+	//mysql.GetInstancePool().Init(&mysql.InstancePoolConfig{
+	//	PoolSize:     0,
+	//	InitInstance: []string{},
+	//})
 	mysql.GetClusterPool().Init(&mysql.ClusterPoolConfig{
 		PoolSize:    len(nodeports),
 		InitCluster: confs,

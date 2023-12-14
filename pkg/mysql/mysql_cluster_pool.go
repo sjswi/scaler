@@ -57,7 +57,7 @@ func (m *MySQLClusterPool) Init(conf *ClusterPoolConfig) {
 
 		m.pools[i] = &conf.InitCluster[i]
 	}
-	go m.daemon()
+	//go m.daemon()
 }
 
 func (m *MySQLClusterPool) daemon() {
