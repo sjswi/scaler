@@ -1,7 +1,7 @@
 package main
 
 import (
-	"conserver/pkg/redis"
+	"conserver/pkg/mysql"
 	"context"
 	"fmt"
 	"k8s.io/apimachinery/pkg/util/rand"
@@ -77,7 +77,7 @@ func BenchmarkMatch(b *testing.B) {
 
 func TestMySQL(t *testing.T) {
 	ch := make(chan int)
-	redis.GetInstancePool().Init(&redis.InstancePoolConfig{
+	mysql.GetInstancePool().Init(&mysql.InstancePoolConfig{
 		PoolSize:     5,
 		InitInstance: nil,
 	})
