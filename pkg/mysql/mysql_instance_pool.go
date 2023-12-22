@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"conserver/pkg/config"
-	"conserver/pkg/global"
 	"conserver/pkg/k8s"
 	"conserver/pkg/util"
 	"fmt"
@@ -116,22 +115,22 @@ func (m *MySQLInstancePool) newInstance() *config.Instance {
 		panic(err)
 	}
 	fmt.Println(uid[:6])
-	nodeport, err := op.createService(deployName, svcName)
+	_, err = op.createService(deployName, svcName)
 	if err != nil {
 		panic(err)
 	}
-	dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", global.Host, nodeport, dbName)
+	//dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", global.Host, nodeport, dbName)
 	op.waitReady(deployName)
 
 	//global.DbConfig.ClusterConnConfig[key].Replica = append(global.DbConfig.ClusterConnConfig[key].Replica, dsp)
 	//global.DbConfig.ClusterConnConfig[key].ReplicaWeight = append(global.DbConfig.ClusterConnConfig[key].ReplicaWeight, 1)
 
 	newInstance := &config.Instance{
-		Name:          uid,
-		CreateTime:    time.Now(),
-		CostPerMinute: 0,
-		NodePort:      int(nodeport),
-		DSP:           dsp,
+		Name:       uid,
+		CreateTime: time.Now(),
+		//CostPerMinute: 0,
+		//NodePort:      int(nodeport),
+		//DSP:           dsp,
 	}
 
 	return newInstance

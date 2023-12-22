@@ -27,7 +27,7 @@ func GetRedisClient() *RedisClient {
 
 func newRedisClient() *RedisClient {
 	c := redis.NewClient(&redis.Options{
-		Addr: fmt.Sprintf("%s:%d", global.Host, global.ConfigPort),
+		Addr: global.ConfigHost,
 		DB:   2,
 	})
 	return &RedisClient{client: c}

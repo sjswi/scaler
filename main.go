@@ -28,14 +28,12 @@ func main() {
 		panic(err)
 	}
 
-	nodeports := viper.GetIntSlice("cluster.ports")
-	global.Host = viper.GetString("host")
-	global.ConfigPort = viper.GetInt("configPort")
-	fmt.Printf("%s:%d", global.Host, global.ConfigPort)
+	nodeports := viper.GetStringSlice("cluster.ports")
+	global.ConfigHost = viper.GetString("configHost")
 	k8s.Init()
 	confs := make([]config.ClusterConfig, len(nodeports))
 	for i, v := range nodeports {
-		dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", global.Host, v, "db_test")
+		dsp := fmt.Sprintf("axzq:AxzqDapr2023@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local", v, "db_test")
 		confs[i] = config.ClusterConfig{
 			Source:          dsp,
 			Replica:         []string{dsp},
@@ -59,15 +57,16 @@ func main() {
 		InitCluster: confs,
 	})
 
-	rNodeports := viper.GetIntSlice("redis.ports")
+	rNodeports := viper.GetStringSlice("redis.ports")
 	rConfs := make([]*config.RedisInstance, len(nodeports))
 	for i, v := range rNodeports {
-		addr := fmt.Sprintf("%s:%d", global.Host, v)
+		addr := fmt.Sprintf("%s", v)
 		rConfs[i] = &config.RedisInstance{
 			Name:          fmt.Sprintf("redis-%d", i),
 			CreateTime:    time.Now(),
 			CostPerMinute: 0,
 			NodePort:      0,
+			Password:      "AxzqDapr2023",
 			Addr:          addr,
 		}
 

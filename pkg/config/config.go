@@ -38,6 +38,7 @@ type RedisInstance struct {
 	Name          string
 	CreateTime    time.Time
 	CostPerMinute int64
+	Password      string
 	NodePort      int
 	Addr          string
 }

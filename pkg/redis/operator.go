@@ -24,9 +24,12 @@ func (op *Operator) Scale(key string) string {
 	client := k8s.GetRedisClient()
 	pool := GetInstancePool()
 	instance := pool.GetInstance()
+	if instance == nil {
+		return ""
+	}
 	global.RedisConfig[key] = map[string]string{
 		"redisHost":     instance.Addr,
-		"redisPassword": "",
+		"redisPassword": "AxzqDapr2023",
 	}
 	client.SetRedis()
 	log.Default().Printf("增加一个redis实例，key：%s, addr：%s", key, instance.Addr)

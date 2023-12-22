@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"conserver/pkg/config"
-	"conserver/pkg/global"
 	"conserver/pkg/k8s"
 	"conserver/pkg/util"
 	"fmt"
@@ -96,11 +95,12 @@ func (m *MySQLClusterPool) newCluster() *config.ClusterConfig {
 	if err != nil {
 		panic(err)
 	}
-	nodeport, err := op.createService(deployName, svcName)
+	_, err = op.createService(deployName, svcName)
 	if err != nil {
 		panic(err)
 	}
-	dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", global.Host, nodeport, dbName)
+	//dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", global.Host, nodeport, dbName)
+	dsp := ""
 	op.waitReady(deployName)
 
 	op.setup(deployName, "", "master")

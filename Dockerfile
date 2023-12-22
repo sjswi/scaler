@@ -1,4 +1,3 @@
-FROM --platform=${TARGETPLATFORM:-linux/amd64} ghcr.io/openfaas/of-watchdog:0.9.8 as watchdog
 FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.20-alpine as build
 
 ARG TARGETPLATFORM
@@ -40,10 +39,5 @@ COPY --from=build --chown=app /app/scaler   .
 
 
 USER app
-
-ENV fprocess="./handler"
-ENV mode="http"
-ENV upstream_url="http://127.0.0.1:8082"
-ENV prefix_logs="false"
 
 CMD ["./scaler"]

@@ -12,6 +12,5 @@ var (
 	RedisConfig            map[string]map[string]string
 	TableNameToClusterName *util.ConsistentCache
 	ScalerStartTime        time.Time
-	Host                   string
-	ConfigPort             int
+	ConfigHost             string
 )
