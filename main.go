@@ -29,7 +29,7 @@ func main() {
 
 	nodeports := viper.GetStringSlice("cluster.ports")
 	user := viper.GetString("cluster.user")
-	password := viper.GetString("cluster.user")
+	password := viper.GetString("cluster.password")
 	global.ConfigHost = viper.GetString("configHost")
 	confs := make([]config.ClusterConfig, len(nodeports))
 	for i, v := range nodeports {
