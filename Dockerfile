@@ -5,9 +5,6 @@ ARG BUILDPLATFORM
 ARG TARGETOS
 ARG TARGETARCH
 
-COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
-RUN chmod +x /usr/bin/fwatchdog
-
 ENV CGO_ENABLED=0
 
 RUN mkdir -p /app

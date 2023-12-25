@@ -36,10 +36,9 @@ func (m *RedisInstancePool) GetInstance() *config.RedisInstance {
 	}()
 	if len(m.pools) > 0 {
 		return m.pools[0]
+	} else {
+		return nil
 	}
-	in := m.newInstance()
-	m.pools = append(m.pools, in)
-	return in
 }
 
 func GetInstancePool() *RedisInstancePool {
@@ -73,4 +72,10 @@ func (m *RedisInstancePool) daemon() {
 func (m *RedisInstancePool) newInstance() *config.RedisInstance {
 
 	return nil
+}
+
+func (m *RedisInstancePool) recycle(instance *config.RedisInstance) {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	m.pools = append(m.pools, instance)
 }

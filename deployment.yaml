@@ -15,6 +15,7 @@ spec:
       nodePort: 31444
   type: NodePort
 ---
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -22,16 +23,13 @@ metadata:
   namespace: dapr-yxb
 data:
   pool.yaml: |-
-    host: 10.10.150.24
     cluster:
-      user: root
-      password: 123456
-      ports: ["10.10.150.24:32626", "10.10.150.24:32083", "10.10.150.24:32447", "10.10.150.24:30870","10.10.150.24:30246"]
+      user: axzq
+      password: AxzqDapr2023
+      ports: ["10.27.58.162:3331", "10.27.58.154:3331", "10.27.58.191:3331", "10.27.58.185:3331","10.27.58.166:3331","10.27.58.133:3331","10.27.58.150:3331"]
     redis:
-      ports: ["10.10.150.24:32499","10.10.150.24:30585","10.10.150.24:32580","10.10.150.24:32088"]
-
-
-configHost : "10.10.150.24:31787"
+      ports: ["10.27.58.155:6379","10.27.58.74:6379","10.27.58.43:6379","10.27.58.157:6379","10.27.58.206:6379","10.27.58.110:6379"]
+    configHost : "10.27.58.141:6379"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -54,6 +52,8 @@ spec:
         - name: config-volume
           configMap:
             name: ax-scaler-pool
+              - key: pool.yaml
+                path: pool.yaml
       containers:
         - name: ax-scaler
           image: 10.10.150.23:35000/ax-scaler:v0.0.1
@@ -70,4 +70,5 @@ spec:
           volumeMounts:
             - name: config-volume
               mountPath: /app/pool.yaml
+              subPath: pool.yaml
 

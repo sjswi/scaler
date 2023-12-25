@@ -87,7 +87,11 @@ func scaleRedisHandler(writer http.ResponseWriter, request *http.Request) {
 	resp := new(ScaleRedisResponse)
 	if len(global.RedisConfig) < scaleReq.InstanceNum {
 		for i := 0; i < scaleReq.InstanceNum-len(global.RedisConfig); i++ {
-			redis.GetOperator().Scale(scaleReq.Key)
+			redis.GetOperator().Scale()
+		}
+	} else {
+		for i := 0; i < len(global.RedisConfig)-scaleReq.InstanceNum; i++ {
+			redis.GetOperator().Remove(scaleReq.Key)
 		}
 	}
 	resp.Key = scaleReq.Key
@@ -97,5 +101,4 @@ func scaleRedisHandler(writer http.ResponseWriter, request *http.Request) {
 		panic(err)
 	}
 	writer.Write(marshal)
-
 }
