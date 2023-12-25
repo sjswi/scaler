@@ -1,13 +1,17 @@
 package controller
 
 import (
+	"conserver/pkg/config"
 	"conserver/pkg/global"
 	"conserver/pkg/mysql"
 	"conserver/pkg/redis"
 	"conserver/pkg/util"
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/spf13/viper"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -70,10 +74,21 @@ func scaleMySQLHandler(writer http.ResponseWriter, request *http.Request) {
 		panic(err)
 	}
 	writer.Write(marshal)
-	util.UpdateComponent()
+	UpdateComponent()
 
 }
+func UpdateComponent() {
+	marshal, err2 := json.Marshal(global.DbConfig)
+	if err2 != nil {
+		panic(err2)
+	}
 
+	err := global.ConfigClient.Set(context.TODO(), config.DatabaseKey, string(marshal), -1).Err()
+	if err != nil {
+		log.Fatalf("%s 更新配置失败.\n", viper.GetString("metadata.name"))
+	}
+
+}
 func scaleRedisHandler(writer http.ResponseWriter, request *http.Request) {
 	var scaleReq *ScaleRequest
 	all, err2 := io.ReadAll(request.Body)

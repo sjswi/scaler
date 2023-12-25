@@ -1,19 +1,12 @@
 package util
 
 import (
-	"conserver/pkg/config"
-	"conserver/pkg/global"
-	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/spf13/viper"
 	"k8s.io/apimachinery/pkg/util/uuid"
-	"log"
 	"regexp"
 	"sort"
 	"strings"
-	"time"
 )
 
 func Int32Ptr(i int32) *int32 { return &i }
@@ -72,34 +65,4 @@ func ParseFileAndPos(str string) (string, string) {
 		panic(errors.New("error"))
 	}
 	return "", ""
-}
-
-func UpdateComponent() {
-	marshal, err2 := json.Marshal(global.DbConfig)
-	if err2 != nil {
-		panic(err2)
-	}
-
-	err := global.ConfigClient.Set(context.TODO(), config.DatabaseKey, string(marshal), -1).Err()
-	if err != nil {
-		log.Fatalf("%s 更新配置失败.\n", viper.GetString("metadata.name"))
-	}
-
-}
-
-func SetRedis() {
-	var r2 struct {
-		Config map[string]map[string]string `json:"config"`
-	}
-	r2.Config = global.RedisConfig
-	bytes, err := json.Marshal(r2)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("更新redis配置信息，新配置：%v, 当前时间：%v\n", r2.Config, time.Now())
-	err = global.ConfigClient.Set(context.TODO(), config.RedisConfigKey, string(bytes), -1).Err()
-	if err != nil {
-		panic(err)
-	}
-
 }

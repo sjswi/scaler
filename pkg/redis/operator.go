@@ -3,7 +3,9 @@ package redis
 import (
 	"conserver/pkg/config"
 	"conserver/pkg/global"
-	"conserver/pkg/util"
+	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 )
@@ -30,7 +32,7 @@ func (op *Operator) Scale() string {
 		"redisHost":     instance.Addr,
 		"redisPassword": "AxzqDapr2023",
 	}
-	util.SetRedis()
+	updateConfig()
 	log.Default().Printf("增加一个redis实例，key：%s, addr：%s", instance.Name, instance.Addr)
 	return instance.Addr
 }
@@ -41,7 +43,7 @@ func (op *Operator) Remove(name string) {
 	}
 	rConfig := global.RedisConfig[name]
 	delete(global.RedisConfig, name)
-	util.SetRedis()
+	updateConfig()
 	pool := GetInstancePool()
 	instance := &config.RedisInstance{
 		Name:          name,
@@ -53,4 +55,21 @@ func (op *Operator) Remove(name string) {
 	}
 	pool.recycle(instance)
 	log.Default().Printf("删除一个redis实例，key：%s, addr：%s", instance.Name, instance.Addr)
+}
+
+func updateConfig() {
+	var r2 struct {
+		Config map[string]map[string]string `json:"config"`
+	}
+	r2.Config = global.RedisConfig
+	bytes, err := json.Marshal(r2)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("更新redis配置信息，新配置：%v, 当前时间：%v\n", r2.Config, time.Now())
+	err = global.ConfigClient.Set(context.TODO(), config.RedisConfigKey, string(bytes), -1).Err()
+	if err != nil {
+		panic(err)
+	}
+
 }
