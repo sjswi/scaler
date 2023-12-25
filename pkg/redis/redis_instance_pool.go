@@ -2,8 +2,6 @@ package redis
 
 import (
 	"conserver/pkg/config"
-	"conserver/pkg/util"
-	"fmt"
 	"sync"
 	"time"
 )
@@ -74,27 +72,5 @@ func (m *RedisInstancePool) daemon() {
 
 func (m *RedisInstancePool) newInstance() *config.RedisInstance {
 
-	uid := util.RandomName()
-	deployName := fmt.Sprintf("redis-deploy-%s", uid)
-	svcName := fmt.Sprintf("redis-svc-%s", uid)
-	op := GetOperator()
-	err := op.createRedisStatefulSet(deployName)
-	if err != nil {
-		panic(err)
-	}
-	nodeport, err := op.createService(deployName, svcName)
-	if err != nil {
-		panic(err)
-	}
-	addr := fmt.Sprintf("%s:%d", "", nodeport)
-	instance := &config.RedisInstance{
-		Name:          "",
-		CreateTime:    time.Now(),
-		CostPerMinute: 0,
-		NodePort:      0,
-		Addr:          addr,
-		Password:      "AxzqDapr2023",
-	}
-	op.waitReady(deployName)
-	return instance
+	return nil
 }

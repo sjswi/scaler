@@ -66,3 +66,11 @@ func ParseFileAndPos(str string) (string, string) {
 	}
 	return "", ""
 }
+
+func UpdateComponent() {
+
+}
+
+func SetRedis() {
+
+}

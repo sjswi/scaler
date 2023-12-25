@@ -4,7 +4,6 @@ import (
 	"conserver/pkg/config"
 	"conserver/pkg/controller"
 	"conserver/pkg/global"
-	"conserver/pkg/k8s"
 	"conserver/pkg/mysql"
 	"conserver/pkg/redis"
 	"flag"
@@ -32,7 +31,6 @@ func main() {
 	user := viper.GetString("cluster.user")
 	password := viper.GetString("cluster.user")
 	global.ConfigHost = viper.GetString("configHost")
-	k8s.Init()
 	confs := make([]config.ClusterConfig, len(nodeports))
 	for i, v := range nodeports {
 		dsp := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local", user, password, v, "db_test")
@@ -81,9 +79,6 @@ func main() {
 	global.ScalerStartTime = time.Now()
 	// 解析命令行参数
 	flag.Parse()
-	client := k8s.GetK8sClient()
-
-	go client.Listen()
 	controller.RunController()
 	fmt.Println("Asadsass")
 }

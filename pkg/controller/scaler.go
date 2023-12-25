@@ -2,7 +2,6 @@ package controller
 
 import (
 	"conserver/pkg/global"
-	"conserver/pkg/k8s"
 	"conserver/pkg/mysql"
 	"conserver/pkg/redis"
 	"conserver/pkg/util"
@@ -71,7 +70,7 @@ func scaleMySQLHandler(writer http.ResponseWriter, request *http.Request) {
 		panic(err)
 	}
 	writer.Write(marshal)
-	k8s.GetK8sClient().UpdateComponent()
+	util.UpdateComponent()
 
 }
 

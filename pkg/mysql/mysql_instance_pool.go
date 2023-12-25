@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"conserver/pkg/config"
-	"conserver/pkg/k8s"
 	"conserver/pkg/util"
 	"fmt"
 	"sync"
@@ -89,95 +88,11 @@ func (m *MySQLInstancePool) daemon() {
 }
 
 func (m *MySQLInstancePool) newInstance() *config.Instance {
-	// 创建一个从数据库，通过mysqldump加载主数据库数据，然后通过exec在pod中运行configmap加载的脚本将实例作为主数据库的slave
 
-	// uuid 生成一个唯一的标识符 uid，确保资源名称的唯一性。
-	uid := util.RandomName()
-
-	deployName := fmt.Sprintf("mysql-deploy-%s", uid)
-
-	cmName := fmt.Sprintf("mysql-cm-%s", uid)
-	secretName := fmt.Sprintf("mysql-secret-%s", uid[:6])
-	svcName := fmt.Sprintf("mysql-svc-%s", uid[:6])
-	dbName := "db_test"
-	//s := strings.Split(masterEndpoint, ":")
-	op := GetOperator()
-	err := op.createSecret(secretName, dbName)
-	if err != nil {
-		panic(err)
-	}
-	err = op.createDBConfigMap(cmName, util.NewServerID([]int{2, 3}, 2))
-	if err != nil {
-		panic(err)
-	}
-	err = op.createStatefulSet(deployName, secretName, cmName)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(uid[:6])
-	_, err = op.createService(deployName, svcName)
-	if err != nil {
-		panic(err)
-	}
-	//dsp := fmt.Sprintf("root:123456@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", global.Host, nodeport, dbName)
-	op.waitReady(deployName)
-
-	//global.DbConfig.ClusterConnConfig[key].Replica = append(global.DbConfig.ClusterConnConfig[key].Replica, dsp)
-	//global.DbConfig.ClusterConnConfig[key].ReplicaWeight = append(global.DbConfig.ClusterConnConfig[key].ReplicaWeight, 1)
-
-	newInstance := &config.Instance{
-		Name:       uid,
-		CreateTime: time.Now(),
-		//CostPerMinute: 0,
-		//NodePort:      int(nodeport),
-		//DSP:           dsp,
-	}
-
-	return newInstance
+	return nil
 }
 
 func (m *MySQLInstancePool) Delete(name string) {
-
-	deployName := fmt.Sprintf("mysql-deploy-%s", name)
-	pvcBackupName := fmt.Sprintf("mysql-pvc-backup-%s", name)
-	cmName := fmt.Sprintf("mysql-cm-%s", name)
-	initCmName := fmt.Sprintf("mysql-cm-init-%s", name)
-	secretName := fmt.Sprintf("mysql-secret-%s", name)
-	svcName := fmt.Sprintf("mysql-svc-%s", name)
-	client := k8s.GetK8sClient()
-	// 删除 StatefulSet
-	if err := client.DeleteStatefulSet(deployName); err != nil {
-		fmt.Printf("Error deleting StatefulSet: %v\n", err)
-		// Optionally handle the error, e.g., log it, return it, etc.
-	}
-
-	// 删除 Service
-	if err := client.DeleteService(svcName); err != nil {
-		fmt.Printf("Error deleting Service: %v\n", err)
-		// Optionally handle the error
-	}
-
-	// 删除 PVCs
-	if err := client.DeletePVC(pvcBackupName); err != nil {
-		fmt.Printf("Error deleting PVC (backup): %v\n", err)
-		// Optionally handle the error
-	}
-
-	// 删除 ConfigMaps
-	if err := client.DeleteConfigMap(cmName); err != nil {
-		fmt.Printf("Error deleting ConfigMap: %v\n", err)
-		// Optionally handle the error
-	}
-	if err := client.DeleteConfigMap(initCmName); err != nil {
-		fmt.Printf("Error deleting DB ConfigMap: %v\n", err)
-		// Optionally handle the error
-	}
-
-	// 删除 Secret
-	if err := client.DeleteSecret(secretName); err != nil {
-		fmt.Printf("Error deleting Secret: %v\n", err)
-		// Optionally handle the error
-	}
 
 	fmt.Println("MySQL resources deleted successfully")
 }

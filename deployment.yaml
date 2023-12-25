@@ -10,11 +10,28 @@ spec:
     app: ax-scaler
   ports:
     - protocol: TCP
-      port: 80
+      port: 18080
       targetPort: 18080
       nodePort: 31444
   type: NodePort
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ax-scaler-pool
+  namespace: dapr-yxb
+data:
+  pool.yaml: |-
+    host: 10.10.150.24
+    cluster:
+      user: root
+      password: 123456
+      ports: ["10.10.150.24:32626", "10.10.150.24:32083", "10.10.150.24:32447", "10.10.150.24:30870","10.10.150.24:30246"]
+    redis:
+      ports: ["10.10.150.24:32499","10.10.150.24:30585","10.10.150.24:32580","10.10.150.24:32088"]
 
+
+configHost : "10.10.150.24:31787"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -33,17 +50,24 @@ spec:
       labels:
         app: ax-scaler
     spec:
-      resources:
-        limits:
-          cpu: 2000m
-          memory: 4Gi
-        requests:
-          cpu: 2000m
-          memory: 4Gi
+      volumes:
+        - name: config-volume
+          configMap:
+            name: ax-scaler-pool
       containers:
         - name: ax-scaler
           image: 10.10.150.23:35000/ax-scaler:v0.0.1
           ports:
             - containerPort: 18080
           imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+            requests:
+              cpu: 2000m
+              memory: 4Gi
+          volumeMounts:
+            - name: config-volume
+              mountPath: /app/pool.yaml
 
