@@ -41,7 +41,7 @@ func main() {
 			ReplicaWeight:   nil,
 			ElasticInstance: nil,
 			ServerIds:       nil,
-			Name:            fmt.Sprintf("cluster-%d", v),
+			Name:            fmt.Sprintf("cluster-%s", v),
 		}
 
 	}

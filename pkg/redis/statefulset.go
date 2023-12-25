@@ -35,6 +35,13 @@ func (op *Operator) createRedisStatefulSet(appName string) error {
 									Name:          "redis",
 								},
 							},
+							Env: []corev1.EnvVar{
+								{
+									Name:  "REDIS_PASSWORD",
+									Value: "AxzqDapr2023",
+								},
+							},
+							Args: []string{"--requirepass", "$(REDIS_PASSWORD)"},
 							LivenessProbe: &corev1.Probe{
 								ProbeHandler: corev1.ProbeHandler{
 									Exec: &corev1.ExecAction{

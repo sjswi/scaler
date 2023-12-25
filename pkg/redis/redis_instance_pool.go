@@ -93,6 +93,7 @@ func (m *RedisInstancePool) newInstance() *config.RedisInstance {
 		CostPerMinute: 0,
 		NodePort:      0,
 		Addr:          addr,
+		Password:      "AxzqDapr2023",
 	}
 	op.waitReady(deployName)
 	return instance

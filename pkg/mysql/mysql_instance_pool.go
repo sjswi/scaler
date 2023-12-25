@@ -66,7 +66,7 @@ func (m *MySQLInstancePool) Init(conf *InstancePoolConfig) {
 			NodePort:      0,
 		}
 	}
-	go m.daemon()
+	//go m.daemon()
 }
 
 func (m *MySQLInstancePool) daemon() {

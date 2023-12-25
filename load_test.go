@@ -2,6 +2,7 @@ package main
 
 import (
 	"conserver/pkg/mysql"
+	"conserver/pkg/redis"
 	"context"
 	"fmt"
 	"k8s.io/apimachinery/pkg/util/rand"
@@ -79,6 +80,15 @@ func TestMySQL(t *testing.T) {
 	ch := make(chan int)
 	mysql.GetInstancePool().Init(&mysql.InstancePoolConfig{
 		PoolSize:     5,
+		InitInstance: nil,
+	})
+	<-ch
+}
+
+func TestRedis(t *testing.T) {
+	ch := make(chan int)
+	redis.GetInstancePool().Init(&redis.InstancePoolConfig{
+		PoolSize:     4,
 		InitInstance: nil,
 	})
 	<-ch
