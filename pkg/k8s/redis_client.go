@@ -27,8 +27,9 @@ func GetRedisClient() *RedisClient {
 
 func newRedisClient() *RedisClient {
 	c := redis.NewClient(&redis.Options{
-		Addr: global.ConfigHost,
-		DB:   0,
+		Addr:     global.ConfigHost,
+		DB:       0,
+		Password: "AxzqDapr2023",
 	})
 	return &RedisClient{client: c}
 }

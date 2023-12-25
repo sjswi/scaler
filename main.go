@@ -29,11 +29,13 @@ func main() {
 	}
 
 	nodeports := viper.GetStringSlice("cluster.ports")
+	user := viper.GetString("cluster.user")
+	password := viper.GetString("cluster.user")
 	global.ConfigHost = viper.GetString("configHost")
 	k8s.Init()
 	confs := make([]config.ClusterConfig, len(nodeports))
 	for i, v := range nodeports {
-		dsp := fmt.Sprintf("axzq:AxzqDapr2023@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local", v, "db_test")
+		dsp := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local", user, password, v, "db_test")
 		confs[i] = config.ClusterConfig{
 			Source:          dsp,
 			Replica:         []string{dsp},
