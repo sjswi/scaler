@@ -3,6 +3,7 @@ package global
 import (
 	"conserver/pkg/config"
 	"conserver/pkg/util"
+	"github.com/go-redis/redis/v8"
 	"time"
 )
 
@@ -13,4 +14,5 @@ var (
 	TableNameToClusterName *util.ConsistentCache
 	ScalerStartTime        time.Time
 	ConfigHost             string
+	ConfigClient           *redis.Client
 )

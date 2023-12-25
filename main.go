@@ -8,6 +8,7 @@ import (
 	"conserver/pkg/redis"
 	"flag"
 	"fmt"
+	redisv8 "github.com/go-redis/redis/v8"
 	"github.com/spf13/viper"
 	"time"
 )
@@ -71,7 +72,11 @@ func main() {
 		}
 
 	}
-
+	global.ConfigClient = redisv8.NewClient(&redisv8.Options{
+		Addr:     global.ConfigHost,
+		Password: "AxzqDapr2023",
+		DB:       0,
+	})
 	redis.GetInstancePool().Init(&redis.InstancePoolConfig{
 		PoolSize:     len(rNodeports),
 		InitInstance: rConfs,
