@@ -31,11 +31,11 @@ func init() {
 func (m *RedisInstancePool) GetInstance() *config.RedisInstance {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	defer func() {
-		m.pools = m.pools[1:]
-	}()
+
 	if len(m.pools) > 0 {
-		return m.pools[0]
+		in := m.pools[0]
+		m.pools = m.pools[1:]
+		return in
 	} else {
 		return nil
 	}

@@ -90,6 +90,7 @@ func UpdateComponent() {
 
 }
 func scaleRedisHandler(writer http.ResponseWriter, request *http.Request) {
+	fmt.Printf("scaleRedisHandler start")
 	var scaleReq *ScaleRequest
 	all, err2 := io.ReadAll(request.Body)
 	if err2 != nil {
@@ -102,11 +103,14 @@ func scaleRedisHandler(writer http.ResponseWriter, request *http.Request) {
 	resp := new(ScaleRedisResponse)
 	if len(global.RedisConfig) < scaleReq.InstanceNum {
 		for i := 0; i < scaleReq.InstanceNum-len(global.RedisConfig); i++ {
+			fmt.Printf("增加一个redis实例\n")
 			redis.GetOperator().Scale()
 		}
 	} else {
 		for i := 0; i < len(global.RedisConfig)-scaleReq.InstanceNum; i++ {
+			fmt.Printf("减少一个redis实例\n")
 			redis.GetOperator().Remove(scaleReq.Key)
+
 		}
 	}
 	resp.Key = scaleReq.Key
@@ -116,4 +120,5 @@ func scaleRedisHandler(writer http.ResponseWriter, request *http.Request) {
 		panic(err)
 	}
 	writer.Write(marshal)
+	fmt.Printf("scaleRedisHandler end")
 }
